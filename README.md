@@ -2,12 +2,22 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Pre-requisite
+https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=physical&mode=development-build
+1. node 18.17.0
+2. yarn
+3. yarn global add eas-cli
+4. install android sdk
+5. set environment path ANDROID_HOME
+
+
 ## Get started
+
 
 1. Install dependencies
 
    ```bash
-   npm install
+   yarn
    ```
 
 2. Start the app

@@ -1,0 +1,27 @@
+{
+  "cli": {
+    "version": ">= 10.0.3"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+            "ANDROID_SDK_ROOT": "/home/tanuj/Android/Sdk"
+        }
+    },
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "env": {
+            "ANDROID_SDK_ROOT": "/home/tanuj/Android/Sdk"
+        }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
