@@ -13,7 +13,7 @@
     "lint": "expo lint",
     "login": "eas login",
     "build-apk": "eas build --platform android --profile preview",
-    "expo": "expo"
+    "start-expo": "expo"
   },
   "jest": {
     "preset": "jest-expo"
@@ -35,12 +35,12 @@
     "expo-router": "~3.5.17",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
-    "expo-system-ui": "~3.0.6",
+    "expo-system-ui": "3.0.7",
     "expo-web-browser": "~13.0.3",
     "galio-framework": "^0.8.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-native": "^0.74.2",
+    "react-native": "0.74.3",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-maps": "1.14.0",
     "react-native-modal-dropdown": "^1.0.2",
