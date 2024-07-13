@@ -1,15 +1,33 @@
 import React from 'react';
-import { StyleSheet, Dimensions, ScrollView, Image } from 'react-native';
+import { StyleSheet, Dimensions, ScrollView, Image, Alert } from 'react-native';
 import { Block, Text, theme } from 'galio-framework';
 
 import { Card, MapViewComponent } from '../components';
 //argon
 import { Images, articles } from "../constants/";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const { width } = Dimensions.get('screen');
 
 const thumbMeasure = (width - 48 - 32) / 3;
 
+
 class Home extends React.Component {
+
+
+  constructor(props){
+    super(props)
+    
+    this.state = {
+      userType: ''
+    }
+  }
+
+  async componentDidMount() {
+    const userType = await AsyncStorage.getItem('userType');
+    this.setState({userType});
+  }
+
   renderArticles = () => {
     return (
       <ScrollView
@@ -57,26 +75,29 @@ class Home extends React.Component {
 
   render() {
     const tabId = this.props.route.params?.tabId || 'Memories';
+    const userType = this.state.userType;
     switch(tabId) {
       case 'Memories':
         return (
           <Block flex center style={styles.home}>
+            <Text>{userType}</Text>
             {this.renderAlbum()}
           </Block>
         );
       case 'Routine':
         return (
           <Block flex center style={styles.home}>
+            <Text>{userType}</Text>
             {this.renderArticles()}
           </Block>
         );
       case 'Location':
         return (
           <Block flex center style={styles.home}>
+            <Text>{userType}</Text>
             <MapViewComponent />
           </Block>
         );
-      break;
     }
 
     

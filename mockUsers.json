@@ -1,0 +1,15 @@
+{
+    "users": [
+      {
+        "email": "user",
+        "password": "pass",
+        "type": "Patient"
+      },
+      {
+        "email": "admin",
+        "password": "pass",
+        "type": "CareTaker"
+      }
+    ]
+  }
+  

@@ -5,6 +5,7 @@ import * as Font from "expo-font";
 import { Asset } from "expo-asset";
 import { Block, GalioProvider } from "galio-framework";
 import { NavigationContainer } from "@react-navigation/native";
+import * as Notifications from 'expo-notifications';
 
 // Before rendering any navigation stack
 import { enableScreens } from "react-native-screens";
@@ -12,6 +13,7 @@ enableScreens();
 
 import Screens from "../navigation/Screens";
 import { Images, articles, argonTheme } from "../constants";
+
 
 // cache app images
 const assetImages = [
@@ -48,6 +50,12 @@ export default function Index() {
         await Font.loadAsync({
           ArgonExtra: require("../assets/font/argon.ttf"),
         });
+
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Permission to access notifications was denied');
+        }
+
       } catch (e) {
         console.warn(e);
       } finally {
@@ -73,12 +81,12 @@ export default function Index() {
   }
 
   return (
-    <NavigationContainer onReady={onLayoutRootView} independent={true}>
-      <GalioProvider theme={argonTheme}>
-        <Block flex>
-          <Screens />
-        </Block>
-      </GalioProvider>
-    </NavigationContainer>
+      <NavigationContainer onReady={onLayoutRootView} independent={true}>
+        <GalioProvider theme={argonTheme}>
+          <Block flex>
+            <Screens />
+          </Block>
+        </GalioProvider>
+      </NavigationContainer>
   );
 }

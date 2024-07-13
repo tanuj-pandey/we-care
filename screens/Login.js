@@ -1,22 +1,69 @@
-import React from "react";
+import React from 'react';
 import {
   StyleSheet,
   ImageBackground,
   Dimensions,
   StatusBar,
-  KeyboardAvoidingView
-} from "react-native";
-import { Block, Checkbox, Text, theme } from "galio-framework";
+  KeyboardAvoidingView,
+  Alert,
+} from 'react-native';
+import { Block, Checkbox, Text, theme } from 'galio-framework';
+import { Button, Icon, Input } from '../components';
+import { Images, argonTheme } from '../constants';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { authenticateUser } from '../services/authService';
 
-import { Button, Icon, Input } from "../components";
-import { Images, argonTheme } from "../constants";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { width, height } = Dimensions.get("screen");
+const { width, height } = Dimensions.get('screen');
 
 class Login extends React.Component {
+
+  state = {
+    email: '',
+    password: '',
+  };
+
+  handleBiometricLogin = async () => {
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Login with Biometrics',
+      fallbackLabel: 'Enter Password',
+    });
+
+    if (result.success) {
+      try {
+        await AsyncStorage.setItem('userType', 'Patient');
+      } catch (e) {
+        // saving error
+      }
+      this.navigateToHome('Memories');
+    } else {
+      Alert.alert('Authentication Failed', 'Please try again');
+    }
+  };
+
+  handleLogin = async () => {
+    const { email, password } = this.state;
+    const result = await authenticateUser(email, password);
+
+    if (result.success) {
+      try {
+        await AsyncStorage.setItem('userType', result.userType);
+      } catch (e) {
+        // saving error
+      }
+      this.navigateToHome('Memories');
+    } else {
+      Alert.alert('Authentication Failed', result.message);
+    }
+  };
+
+  navigateToHome = (tabId) => {
+    // Navigate to home or wherever needed
+    this.props.navigation.navigate('Home', { tabId });
+  };
+
   render() {
-    const { navigation } = this.props;
-    
     return (
       <Block flex middle>
         <StatusBar hidden />
@@ -42,6 +89,10 @@ class Login extends React.Component {
                       <Input
                         borderless
                         placeholder="Email"
+                        value={this.state.email}
+                        onChangeText={(text) =>
+                          this.setState({ email: text })
+                        }
                         iconContent={
                           <Icon
                             size={16}
@@ -58,6 +109,10 @@ class Login extends React.Component {
                         password
                         borderless
                         placeholder="Password"
+                        value={this.state.password}
+                        onChangeText={(text) =>
+                          this.setState({ password: text })
+                        }
                         iconContent={
                           <Icon
                             size={16}
@@ -69,11 +124,18 @@ class Login extends React.Component {
                         }
                       />
                       <Block row style={styles.passwordCheck}>
-                        <Text size={12} color={argonTheme.COLORS.MUTED}>
+                        <Text
+                          size={12}
+                          color={argonTheme.COLORS.MUTED}
+                        >
                           password strength:
                         </Text>
-                        <Text bold size={12} color={argonTheme.COLORS.SUCCESS}>
-                          {" "}
+                        <Text
+                          bold
+                          size={12}
+                          color={argonTheme.COLORS.SUCCESS}
+                        >
+                          {' '}
                           strong
                         </Text>
                       </Block>
@@ -81,16 +143,39 @@ class Login extends React.Component {
                     <Block row width={width * 0.75}>
                       <Checkbox
                         checkboxStyle={{
-                          borderWidth: 3
+                          borderWidth: 3,
                         }}
                         color={argonTheme.COLORS.PRIMARY}
                         label="Are you the primary user"
                       />
                     </Block>
                     <Block middle>
-                      <Button color="primary" style={styles.createButton} onPress={() => navigation.navigate('Home', { tabId: 'Memories' })}>
-                        <Text bold size={14} color={argonTheme.COLORS.WHITE}>
+                      <Button
+                        color="primary"
+                        style={styles.createButton}
+                        onPress={this.handleLogin}
+                      >
+                        <Text
+                          bold
+                          size={14}
+                          color={argonTheme.COLORS.WHITE}
+                        >
                           LOGIN
+                        </Text>
+                      </Button>
+                    </Block>
+                    <Block middle>
+                      <Button
+                        color="WARNING"
+                        style={styles.createButton}
+                        onPress={this.handleBiometricLogin}
+                      >
+                        <Text
+                          bold
+                          size={14}
+                          color={argonTheme.COLORS.WHITE}
+                        >
+                          LOGIN WITH BIOMETRICS
                         </Text>
                       </Button>
                     </Block>
@@ -109,53 +194,53 @@ const styles = StyleSheet.create({
   registerContainer: {
     width: width * 0.9,
     height: height * 0.875,
-    backgroundColor: "#F4F5F7",
+    backgroundColor: '#F4F5F7',
     borderRadius: 4,
     shadowColor: argonTheme.COLORS.BLACK,
     shadowOffset: {
       width: 0,
-      height: 4
+      height: 4,
     },
     shadowRadius: 8,
     shadowOpacity: 0.1,
     elevation: 1,
-    overflow: "hidden"
+    overflow: 'hidden',
   },
   socialConnect: {
     backgroundColor: argonTheme.COLORS.WHITE,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: "#8898AA"
+    borderColor: '#8898AA',
   },
   socialButtons: {
     width: 120,
     height: 40,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     shadowColor: argonTheme.COLORS.BLACK,
     shadowOffset: {
       width: 0,
-      height: 4
+      height: 4,
     },
     shadowRadius: 8,
     shadowOpacity: 0.1,
-    elevation: 1
+    elevation: 1,
   },
   socialTextButtons: {
     color: argonTheme.COLORS.PRIMARY,
-    fontWeight: "800",
-    fontSize: 14
+    fontWeight: '800',
+    fontSize: 14,
   },
   inputIcons: {
-    marginRight: 12
+    marginRight: 12,
   },
   passwordCheck: {
     paddingLeft: 15,
     paddingTop: 13,
-    paddingBottom: 30
+    paddingBottom: 30,
   },
   createButton: {
     width: width * 0.5,
-    marginTop: 25
-  }
+    marginTop: 25,
+  },
 });
 
 export default Login;
