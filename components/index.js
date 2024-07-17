@@ -7,6 +7,7 @@ import Input from './Input';
 import Switch from './Switch';
 import Select from './Select';
 import MapViewComponent from './MapViewComponent';
+import ReminderComponent from './ReminderComponent';
 
 export {
   Button,
@@ -17,5 +18,6 @@ export {
   Header,
   Switch, 
   Select,
-  MapViewComponent
+  MapViewComponent,
+  ReminderComponent,
 };

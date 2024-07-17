@@ -13,7 +13,7 @@ function CustomDrawerContent({
   state,
   ...rest
 }) {
-  const screens = ["Home", "Profile", "Account", "Elements", "Articles"];
+  const screens = ["Home", "Profile", "Account", "Elements", "Articles", "Game"];
   const index = screens.findIndex((screen) => state.routes[state.index]?.name === screen);
   let currentRouteName = 'Home';
   if (index > -1) {

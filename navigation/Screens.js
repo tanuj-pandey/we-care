@@ -14,6 +14,7 @@ import Pro from "../screens/Pro";
 import Profile from "../screens/Profile";
 import React from "react";
 import Register from "../screens/Register";
+import Game from "../screens/Game";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
 
@@ -326,6 +327,13 @@ function AppStack(props) {
       <Drawer.Screen
         name="Articles"
         component={ArticlesStack}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Drawer.Screen
+        name="Game"
+        component={Game}
         options={{
           headerShown: false,
         }}

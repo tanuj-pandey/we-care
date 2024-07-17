@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Dimensions, ScrollView, Image, Alert } from 'react-native';
 import { Block, Text, theme } from 'galio-framework';
 
-import { Card, MapViewComponent } from '../components';
+import { Card, MapViewComponent, ReminderComponent } from '../components';
 //argon
 import { Images, articles } from "../constants/";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -88,7 +88,7 @@ class Home extends React.Component {
         return (
           <Block flex center style={styles.home}>
             <Text>{userType}</Text>
-            {this.renderArticles()}
+            <ReminderComponent />
           </Block>
         );
       case 'Location':
