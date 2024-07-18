@@ -3,12 +3,12 @@
         "id": 1,
         "title": "Meeting with John",
         "description": "Discuss the project status",
-        "time": "22:21"
+        "timeWindow": "22:21"
     },
     {
         "id": 2,
         "title": "Doctor's Appointment",
         "description": "Annual health check-up",
-        "time": "20:47"
+        "timeWindow": "20:47"
     }
 ]

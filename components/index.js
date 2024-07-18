@@ -8,6 +8,8 @@ import Switch from './Switch';
 import Select from './Select';
 import MapViewComponent from './MapViewComponent';
 import ReminderComponent from './ReminderComponent';
+import ImageUpload from './ImageUpload';
+import Schedule from './Schedule';
 
 export {
   Button,
@@ -20,4 +22,6 @@ export {
   Select,
   MapViewComponent,
   ReminderComponent,
+  ImageUpload,
+  Schedule,
 };

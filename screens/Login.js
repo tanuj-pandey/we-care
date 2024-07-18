@@ -32,11 +32,16 @@ class Login extends React.Component {
 
     if (result.success) {
       try {
-        await AsyncStorage.setItem('userType', 'Patient');
+        const userDetails = await AsyncStorage.getItem('userDetails');
+        if (userDetails) {
+          this.navigateToHome('Memories');
+        }
+        else {
+          Alert.alert('Authentication Failed', 'Please try again');
+        }
       } catch (e) {
         // saving error
       }
-      this.navigateToHome('Memories');
     } else {
       Alert.alert('Authentication Failed', 'Please try again');
     }
@@ -48,7 +53,7 @@ class Login extends React.Component {
 
     if (result.success) {
       try {
-        await AsyncStorage.setItem('userType', result.userType);
+        await AsyncStorage.setItem('userDetails', JSON.stringify(result.user));
       } catch (e) {
         // saving error
       }

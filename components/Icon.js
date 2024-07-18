@@ -5,6 +5,7 @@ import { Icon } from 'galio-framework';
 
 import argonConfig from '../assets/config/argon.json';
 const ArgonExtra = require('../assets/font/argon.ttf');
+const Galio = require("../node_modules/galio-framework/src/fonts/galio.ttf");
 const IconArgonExtra = createIconSetFromIcoMoon(argonConfig, 'ArgonExtra');
 
 class IconExtra extends React.Component {
@@ -13,7 +14,7 @@ class IconExtra extends React.Component {
   }
 
   async componentDidMount() {
-    await Font.loadAsync({ ArgonExtra: ArgonExtra });
+    await Font.loadAsync({ ArgonExtra: ArgonExtra, Galio: Galio });
     this.setState({ fontLoaded: true });
   }
 

@@ -7,12 +7,17 @@ import { Block, GalioProvider } from "galio-framework";
 import { NavigationContainer } from "@react-navigation/native";
 import * as Notifications from 'expo-notifications';
 
+
 // Before rendering any navigation stack
 import { enableScreens } from "react-native-screens";
+import Toast from 'react-native-toast-message';
+
 enableScreens();
 
 import Screens from "../navigation/Screens";
 import { Images, articles, argonTheme } from "../constants";
+
+import { FontAwesome } from '@expo/vector-icons';
 
 
 // cache app images
@@ -49,6 +54,8 @@ export default function Index() {
         // Pre-load fonts, make any API calls you need to do here
         await Font.loadAsync({
           ArgonExtra: require("../assets/font/argon.ttf"),
+          Galio: require("../node_modules/galio-framework/src/fonts/galio.ttf"),
+          ...FontAwesome.font,
         });
 
         const { status } = await Notifications.requestPermissionsAsync();
@@ -87,6 +94,7 @@ export default function Index() {
             <Screens />
           </Block>
         </GalioProvider>
+        <Toast />
       </NavigationContainer>
   );
 }

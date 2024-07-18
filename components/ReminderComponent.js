@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, Button, FlatList, StyleSheet, Alert, Modal } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import reminders from '../reminders.json';
 import * as Localization from 'expo-localization';
 import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAPI } from '../services/api'; 
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -18,18 +19,36 @@ const ReminderComponent = () => {
   const [activeReminder, setActiveReminder] = useState(null);
   const soundRef = useRef(null);
 
-  useEffect(() => {
-    setReminderList(reminders);
-    scheduleAllReminders(reminders);
+  state = {
+    reminders: [],
+    userDetails: {}
+  };
 
-    const subscription = Notifications.addNotificationReceivedListener(handleNotification);
-    return () => {
-      subscription.remove();
-    };
+  fetchReminders = async () => {
+    const userDetails = await AsyncStorage.getItem('userDetails');
+    this.state.userDetails = JSON.parse(userDetails);
+    const id = this.state.userDetails.adminProfileId || this.state.userDetails.id;
+    const reminders = await getAPI('/api/schedules/admin/'+id);
+    this.state.reminders = reminders.schedules; 
+  };
+
+
+  useEffect(() => {
+    (async () => {
+        console.log("inside useEffect")
+        await fetchReminders();
+        setReminderList(this.state.reminders);
+        scheduleAllReminders(this.state.reminders);
+
+        const subscription = Notifications.addNotificationReceivedListener(handleNotification);
+        return () => {
+        subscription.remove();
+        };
+    })();
   }, []);
 
   const handleNotification = (notification) => {
-    const reminder = reminders.find(reminder => reminder.title === notification.request.content.title);
+    const reminder = this.state.reminders.find(reminder => reminder.title === notification.request.content.title);
     if (reminder) {
       setActiveReminder(reminder);
       playAlarmSound();
@@ -37,8 +56,8 @@ const ReminderComponent = () => {
   };
 
   const scheduleAllReminders = (reminders) => {
-    reminders.forEach((reminder) => {
-      const [reminderHour, reminderMinute] = reminder.time.split(':').map(Number);
+    this.state.reminders.forEach((reminder) => {
+      const [reminderHour, reminderMinute] = reminder.timeWindow.split(':').map(Number);
       const now = new Date();
       const triggerDate = new Date(now);
 
@@ -131,7 +150,7 @@ const ReminderComponent = () => {
           <View style={styles.reminderItem}>
             <Text style={styles.title}>{item.title}</Text>
             <Text>{item.description}</Text>
-            <Text>Time: {item.time}</Text>
+            <Text>Time: {item.timeWindow}</Text>
             {/* <View style={styles.buttons}>
               <Button title="Snooze" onPress={() => snoozeReminder(item.id)} />
               <Button title="Dismiss" onPress={() => dismissReminder(item.id)} />
