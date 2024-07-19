@@ -10,6 +10,7 @@ import MapViewComponent from './MapViewComponent';
 import ReminderComponent from './ReminderComponent';
 import ImageUpload from './ImageUpload';
 import Schedule from './Schedule';
+import AddressForm from './AddressForm';
 
 export {
   Button,
@@ -24,4 +25,5 @@ export {
   ReminderComponent,
   ImageUpload,
   Schedule,
+  AddressForm,
 };

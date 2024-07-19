@@ -25,6 +25,24 @@ class Home extends React.Component {
   async componentDidMount() {
     const userDetails = await AsyncStorage.getItem('userDetails');
     this.setState({ userDetails: JSON.parse(userDetails) });
+
+    const isPatient = this.userDetails && this.userDetails.isPatient;
+    const id = this.userDetails?.adminProfileId || this.userDetails?.id;  
+    setInterval(async () => {
+      try {
+        if (id) {
+          const response = await getAPI('/api/breachNotifications/'+id);
+          if(response && !isPatient) {
+            alert('Patient is moving away from home.');
+          }
+        }
+      }
+      catch(e) {
+  
+      }
+    }, 1000);
+    
+    
   }
 
   renderArticles = () => {
@@ -62,7 +80,7 @@ class Home extends React.Component {
         style={[styles.group, { paddingBottom: theme.SIZES.BASE * 5 }]}
       >
         <Block style={{ marginHorizontal: theme.SIZES.BASE * 2 }}>
-        {isPatient && (
+        {!isPatient && (
           <Block style={styles.createButton}>
             <Button color="primary" onPress={() => this.props.navigation.navigate('Home', { tabId: 'UploadImage' })}>
                 <Text bold size={14} color={argonTheme.COLORS.WHITE}>

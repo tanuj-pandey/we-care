@@ -8,108 +8,125 @@ import { getAPI, postAPI } from '../services/api';
 const RADIUS = 1000; // 1000 meters
 
 const MapViewComponent = () => {
+  const [users, setUsers] = useState(null);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [radius, setRadius] = useState(RADIUS);
   const [debounceTimeout, setDebounceTimeout] = useState(null);
 
-  
-  state = {
-    userDetails: {},
-  };
-
-  fetchUserDetails = async() => {
+  const fetchUserDetails = async () => {
     const userDetails = await AsyncStorage.getItem('userDetails');
-    this.state.userDetails = JSON.parse(userDetails);
+    console.log("userDetails", userDetails);
+    setUsers(JSON.parse(userDetails));
   };
 
   useEffect(() => {
-    (async () => {
-
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-
-      try {
-        const id = this.state.userDetails.adminProfileId || this.state.userDetails.id;
-        const savedLocation = await getAPI('/api/geodetails/admin/'+ id);
-      }
-      catch(e) {
-        // Save the initial location
-        if (currentLocation) {
-          // await AsyncStorage.setItem('savedLocation', JSON.stringify(currentLocation));
-          await postAPI('/api/geodetails', {
-            "longitude": currentLocation.coords.longitude,
-            "latitude": currentLocation.coords.latitude,
-            "distance": 1000,
-          });
-        }
-      }
-      
-    })();
+    const initialize = async () => {
+      await fetchUserDetails();
+    };
+    initialize();
   }, []);
 
   useEffect(() => {
-    const monitorLocation = async () => {
-      await fetchUserDetails();
+    if (users) {
+      const initializeLocation = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
 
-      const flag = false;
-      // const savedLocationData = await AsyncStorage.getItem('savedLocation');
-      // const savedLocation = JSON.parse(savedLocationData);
-      const id = this.state.userDetails.adminProfileId || this.state.userDetails.id;
-      const savedLocation = await getAPI('/api/geodetails/admin/'+ id);
+        let currentLocation = await Location.getCurrentPositionAsync({});
+        console.log("Set Location: currentLocation : ", currentLocation)
+        const id = users.adminProfileId || users.id;
+        try {
+          const savedLocation = await getAPI('/api/geodetails/admin/' + id);
+          console.log("savedLocation : ", savedLocation)
 
-      if (savedLocation) {
-        const watchId = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.High, distanceInterval: 100 },
-          (newLocation) => {
-            const distance = getDistanceFromLatLonInMeters(
-              savedLocation.latitude,
-              savedLocation.longitude,
-              newLocation.coords.latitude,
-              newLocation.coords.longitude
-            );
-
-            if (distance > RADIUS && !flag) {
-              if (debounceTimeout) clearTimeout(debounceTimeout);
-
-              setDebounceTimeout(
-                setTimeout(async () => {
-                  const id = this.state.userDetails.adminProfileId || this.state.userDetails.id;
-                 //Alert.alert('Alert', 'You have moved out of the 100 meters radius.');
-                  const data = await postAPI('/api/breachNotifications',
-                    {
-                      "longitude": newLocation.coords.longitude,
-                      "latitude": newLocation.coords.latitude,
-                      "message": "You have moved out of the 1000 meters radius.",
-                      "adminProfileId": id
-                    }
-                  );
-                  
-                }, 3000)
-              );
-              flag = true;
-            } else {
-              if (debounceTimeout) clearTimeout(debounceTimeout);
+          if (savedLocation.latitude && savedLocation.longitude) {
+            setLocation({
+              coords: {
+                latitude: savedLocation.latitude,
+                longitude: savedLocation.longitude
+              }
+            });
+          } else {
+            // Save the initial location
+            if (currentLocation) {
+              await postAPI('/api/geodetails', {
+                "longitude": `${currentLocation.coords.longitude}`,
+                "latitude": `${currentLocation.coords.latitude}`,
+                "distance": 1000,
+                "adminProfileId": id
+              });
+              setLocation(currentLocation);
             }
           }
-        );
-
-        return () => {
-          if (watchId) {
-            watchId.remove();
+        } catch (e) {
+          // Save the initial location if not found
+          if (currentLocation) {
+            await postAPI('/api/geodetails', {
+              "longitude": `${currentLocation.coords.longitude}`,
+              "latitude": `${currentLocation.coords.latitude}`,
+              "distance": 1000,
+              "adminProfileId": id
+            });
+            setLocation(currentLocation);
           }
-        };
-      }
-    };
+        }
+      };
+      initializeLocation();
+    }
+  }, [users]);
 
-    monitorLocation();
-  }, []);
+  useEffect(() => {
+    if (users && users.isPatient) {
+      const monitorLocation = async () => {
+        const id = users.adminProfileId || users.id;
+        const savedLocation = await getAPI('/api/geodetails/admin/' + id);
+
+        if (savedLocation) {
+          const watchId = await Location.watchPositionAsync(
+            { accuracy: Location.Accuracy.High, distanceInterval: 100 },
+            (newLocation) => {
+              const distance = getDistanceFromLatLonInMeters(
+                savedLocation.latitude,
+                savedLocation.longitude,
+                newLocation.coords.latitude,
+                newLocation.coords.longitude
+              );
+
+              if (distance > RADIUS) {
+                if (debounceTimeout) clearTimeout(debounceTimeout);
+
+                setDebounceTimeout(
+                  setTimeout(async () => {
+                    Alert.alert('Alert', 'You are moving away from home.');
+                    await postAPI('/api/breachNotifications', {
+                      "longitude": `${newLocation.coords.longitude}`,
+                      "latitude": `${newLocation.coords.latitude}`,
+                      "message": "Patient is moving away from home.",
+                      "adminProfileId": id
+                    });
+                  }, 3000)
+                );
+              } else {
+                if (debounceTimeout) clearTimeout(debounceTimeout);
+              }
+            }
+          );
+
+          return () => {
+            if (watchId) {
+              watchId.remove();
+            }
+          };
+        }
+      };
+
+      monitorLocation();
+    }
+  }, [users]);
 
   const getDistanceFromLatLonInMeters = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3; // Earth's radius in meters

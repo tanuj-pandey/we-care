@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Image } from "react-native";
+import { Image, LogBox } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import * as Font from "expo-font";
 import { Asset } from "expo-asset";
@@ -11,13 +11,18 @@ import * as Notifications from 'expo-notifications';
 // Before rendering any navigation stack
 import { enableScreens } from "react-native-screens";
 import Toast from 'react-native-toast-message';
-
-enableScreens();
-
 import Screens from "../navigation/Screens";
 import { Images, articles, argonTheme } from "../constants";
 
 import { FontAwesome } from '@expo/vector-icons';
+
+import { getAPI } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Ignore all log notifications
+//LogBox.ignoreAllLogs(true);
+
+enableScreens();
 
 
 // cache app images
@@ -46,6 +51,8 @@ function cacheImages(images: string[]) {
 export default function Index() {
   const [appIsReady, setAppIsReady] = useState(false);
 
+  
+
   useEffect(() => {
     async function prepare() {
       try {
@@ -57,6 +64,8 @@ export default function Index() {
           Galio: require("../node_modules/galio-framework/src/fonts/galio.ttf"),
           ...FontAwesome.font,
         });
+
+        
 
         const { status } = await Notifications.requestPermissionsAsync();
         if (status !== 'granted') {

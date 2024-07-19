@@ -11,7 +11,7 @@ export const getAPI = async (url) => {
     console.log("API response---", response);
     return response.data;
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    console.error('Error fetching get:', error);
     throw error;
   }
 };
@@ -25,6 +25,20 @@ export const postAPI = async (url, post) => {
     return response.data;
   } catch (error) {
     console.error('Error creating post:', error);
+    throw error;
+  }
+};
+
+
+export const putAPI = async (url, post) => {
+  console.log("API URL---", url);
+  console.log("PUT data-----", post);
+  try {
+    const response = await api.put(url, post);
+    console.log("API response---", response);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating put:', error);
     throw error;
   }
 };

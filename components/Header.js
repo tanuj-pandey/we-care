@@ -127,19 +127,19 @@ class Header extends React.Component {
         <Button shadowless style={[styles.tab, styles.divider]} onPress={() => navigation.navigate('Home', { tabId: 'Memories' })}>
           <Block row middle>
             {/* <Icon name="diamond" family="ArgonExtra" style={{ paddingRight: 8 }} color={argonTheme.COLORS.ICON} /> */}
-            <Text size={16} style={styles.tabTitle}>{optionLeft || 'Memories'}</Text>
+            <Text size={16} style={styles.tabTitle}>{optionLeft || 'Face Finder'}</Text>
           </Block>
         </Button>
         <Button shadowless style={[styles.tab, styles.divider]} onPress={() => navigation.navigate('Home', { tabId: 'Routine' })}>
           <Block row middle>
             {/* <Icon size={16} name="bag-17" family="ArgonExtra" style={{ paddingRight: 8 }} color={argonTheme.COLORS.ICON}/> */}
-            <Text size={16} style={styles.tabTitle}>{optionRight || 'Routine'}</Text>
+            <Text size={16} style={styles.tabTitle}>{optionRight || 'Daily Routine'}</Text>
           </Block>
         </Button>
         <Button shadowless style={styles.tab} onPress={() => navigation.navigate('Home', { tabId: 'Location' })}>
           <Block row middle>
             {/* <Icon size={16} name="bag-17" family="ArgonExtra" style={{ paddingRight: 8 }} color={argonTheme.COLORS.ICON}/> */}
-            <Text size={16} style={styles.tabTitle}>{optionRight || 'Location'}</Text>
+            <Text size={16} style={styles.tabTitle}>{optionRight || 'Safe-Zone'}</Text>
           </Block>
         </Button>
       </Block>

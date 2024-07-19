@@ -13,7 +13,11 @@ function CustomDrawerContent({
   state,
   ...rest
 }) {
-  const screens = ["Home", "Profile", "Account", "Elements", "Articles", "Game"];
+  // const screens = ["Home", "Profile", "Account", "Elements", "Articles", "Game"];
+  const screens = ["Home", "Settings", "Play Game"];
+
+
+  
   const index = screens.findIndex((screen) => state.routes[state.index]?.name === screen);
   let currentRouteName = 'Home';
   if (index > -1) {
@@ -39,7 +43,7 @@ function CustomDrawerContent({
               />
             );
           })}
-          <Block
+          {/* <Block
             flex
             style={{ marginTop: 24, marginVertical: 8, paddingHorizontal: 8 }}
           >
@@ -53,8 +57,8 @@ function CustomDrawerContent({
             <Text color="#8898AA" style={{ marginTop: 16, marginLeft: 8 }}>
               DOCUMENTATION
             </Text>
-          </Block>
-          <DrawerCustomItem title="Getting Started" navigation={navigation} />
+          </Block> */}
+          {/* <DrawerCustomItem title="Getting Started" navigation={navigation} /> */}
         </ScrollView>
       </Block>
     </Block>

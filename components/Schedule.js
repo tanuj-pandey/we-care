@@ -5,7 +5,7 @@ import * as Localization from 'expo-localization';
 import { FontAwesome } from '@expo/vector-icons';
 import { Block } from 'galio-framework';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAPI } from '../services/api'; 
+import { getAPI, postAPI } from '../services/api'; 
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -20,30 +20,26 @@ const Schedule = () => {
   const [activeReminder, setActiveReminder] = useState(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editReminder, setEditReminder] = useState(null);
-  const [addModalVisible, setAddModalVisible] = useState(false); // State for add modal visibility
+  const [addModalVisible, setAddModalVisible] = useState(false); 
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newTime, setNewTime] = useState('');
 
-  state = {
-    reminders: [],
-    userDetails: {}
-  };
-
-  fetchReminders = async () => {
+  const fetchReminders = async () => {
     console.log("inside fetchReminders")
     const userDetails = await AsyncStorage.getItem('userDetails');
-    this.state.userDetails = JSON.parse(userDetails);
-    console.log("this.state.userDetails", this.state.userDetails )
-    const id = this.state.userDetails.adminProfileId || this.state.userDetails.id;
+    const parsedUserDetails = JSON.parse(userDetails);
+    const id = parsedUserDetails.adminProfileId || parsedUserDetails.id;
     const reminders = await getAPI('/api/schedules/admin/'+id);
-    console.log("reminders", reminders )
-    this.state.reminders = reminders.schedules;
+    console.log("reminders", reminders)
+    setReminderList(reminders.schedules);
   };
 
   useEffect(() => {
     (async () => {
         console.log("inside useEffect")
         await fetchReminders();
-        setReminderList(this.state.reminders);
-        scheduleAllReminders(this.state.reminders);
+        scheduleAllReminders(reminderList);
 
         const subscription = Notifications.addNotificationReceivedListener(handleNotification);
         return () => {
@@ -53,7 +49,7 @@ const Schedule = () => {
   }, []);
 
   const handleNotification = (notification) => {
-    const reminder = this.state.reminders.find(reminder => reminder.title === notification.request.content.title);
+    const reminder = reminderList.find(reminder => reminder.title === notification.request.content.title);
     if (reminder) {
       setActiveReminder(reminder);
       // playAlarmSound(); // Uncomment if needed
@@ -61,7 +57,7 @@ const Schedule = () => {
   };
 
   const scheduleAllReminders = (reminders) => {
-    this.state.reminders.forEach((reminder) => {
+    reminders.forEach((reminder) => {
       const [reminderHour, reminderMinute] = reminder.timeWindow.split(':').map(Number);
       const now = new Date();
       const triggerDate = new Date(now);
@@ -73,7 +69,7 @@ const Schedule = () => {
 
       // Adjust for timezone (IST in this case)
       const timeZoneOffset = Localization.timezone === 'Asia/Kolkata' ? 5.5 * 60 * 60 * 1000 : 0;
-      const localTriggerDate = new Date(triggerDate.getTime());
+      const localTriggerDate = new Date(triggerDate.getTime() + timeZoneOffset);
 
       // If the trigger time has already passed for today, set it for tomorrow
       if (localTriggerDate <= now) {
@@ -112,16 +108,34 @@ const Schedule = () => {
     setEditReminder(null);
   };
 
-  const handleAddSchedule = () => {
-    // Set the state to show the add modal
-    setAddModalVisible(true);
-  };
+  const handleAddSchedule = async () => {
+    const userDetails = await AsyncStorage.getItem('userDetails');
+    const parsedUserDetails = JSON.parse(userDetails);
+    const id = parsedUserDetails.adminProfileId || parsedUserDetails.id;
 
+    const newSchedule = {
+      adminProfileId: id,
+      schedules: [
+        {
+          title: newTitle,
+          description: newDescription,
+          timeWindow: newTime,
+          frequency: "0",
+          enabled: true
+        }
+      ]
+    };
+
+    await postAPI('/api/schedules', newSchedule);
+    setAddModalVisible(false);
+    setNewTitle('');
+    setNewDescription('');
+    setNewTime('');
+    await fetchReminders();
+  };
 
   return (
     <View style={styles.container}>
-      
-
       <FlatList
         data={reminderList}
         keyExtractor={(item) => item.id.toString()}
@@ -154,9 +168,9 @@ const Schedule = () => {
           </View>
         )}
       />
-<Button
+      <Button
         title="Add Schedule"
-        onPress={handleAddSchedule}
+        onPress={() => setAddModalVisible(true)}
         style={styles.addButton}
       />
       {/* Edit Reminder Modal */}
@@ -185,6 +199,14 @@ const Schedule = () => {
                 setEditReminder({ ...editReminder, description: text })
               }
             />
+            <TextInput
+              style={styles.input}
+              placeholder="Time (HH:MM)"
+              value={editReminder?.timeWindow}
+              onChangeText={(text) =>
+                setEditReminder({ ...editReminder, timeWindow: text })
+              }
+            />
             <View style={styles.modalButtons}>
               <Button title="Save" onPress={saveEditedReminder} />
               <Button
@@ -206,32 +228,34 @@ const Schedule = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Add Schedule</Text>
-            {/* Your input fields for adding a new schedule */}
-            {/* Example: */}
             <TextInput
               style={styles.input}
               placeholder="Title"
-              onChangeText={(text) => {/* Handle title input */}}
+              value={newTitle}
+              onChangeText={setNewTitle}
             />
             <TextInput
               style={styles.input}
               placeholder="Description"
-              onChangeText={(text) => {/* Handle description input */}}
+              value={newDescription}
+              onChangeText={setNewDescription}
             />
             <TextInput
               style={styles.input}
-              placeholder="Time"
-              onChangeText={(text) => {/* Handle description input */}}
+              placeholder="Time (HH:MM)"
+              value={newTime}
+              onChangeText={setNewTime}
             />
-            <Button title="Add" onPress={() => {/* Handle add logic */}} />
-            <Button
-              title="Cancel"
-              onPress={() => setAddModalVisible(false)}
-            />
+            <Block style={styles.twoButtons}>
+              <Button title="Add" onPress={handleAddSchedule} />
+              <Button
+                title="Cancel"
+                onPress={() => setAddModalVisible(false)}
+              />
+            </Block>
           </View>
         </View>
       </Modal>
-      
     </View>
   );
 };
@@ -288,8 +312,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 22,
+    width: '100%'
   },
   modalContainer: {
+    width: '90%',
     margin: 20,
     backgroundColor: 'white',
     borderRadius: 20,
@@ -324,6 +350,11 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 5,
   },
+  twoButtons: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 20,
+  }, 
 });
 
 export default Schedule;

@@ -69,6 +69,12 @@ class Login extends React.Component {
   };
 
   render() {
+    // return (
+    //   <View style={styles.faceDetectionContainer}>
+    //     <FaceDetection />
+    //   </View>
+    // );
+
     return (
       <Block flex middle>
         <StatusBar hidden />
@@ -196,6 +202,11 @@ class Login extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  faceDetectionContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+  },  
   registerContainer: {
     width: width * 0.9,
     height: height * 0.875,
